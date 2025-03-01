@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "squeezer.h"
+//using namespace std;
 
 
 void RxStringParse(void) {
@@ -59,7 +60,7 @@ void RxStringParse(void) {
   
   void SetBootNum(String valStr) {     //mean calculation time (seconds)
     bootCount = atoi(valStr.c_str());  //atoi returns zero if invalid
-    prefs.putUInt("NumBoots", bootCount);
+     prefs.putUInt("NumBoots", bootCount);
   }
   
   void SetTotalRunTime(String valStr) {  //mean calculation time (seconds)
@@ -284,6 +285,7 @@ void RxStringParse(void) {
   
   void FFSend(unsigned long ET) {  //TODO--this has to be in Carter's Format
     static bool sentalready = false;
+    char TxString[25];  // used to transmit
     unsigned long wkul = 123456;
     if (!Force.FFReport) return;
     if ((ET % Force.FFReportTime <= 1) && !sentalready) {
@@ -423,15 +425,12 @@ void RxStringParse(void) {
   }
   
   void SoundBuzz(u_long cwFreq, int sound_ms) {
-    //sounds cwFreq for sound_ms
-    //note--this is blocking
+    //sounds cwFreq for sound_ms;note--this is blocking
     u_long smillis;
-    // Serial.printf(" Freq =%d HZ, for %d ms\n", cwFreq, sound_ms);
     smillis = millis();
-    ledcAttach(buzzPin, cwFreq, resolution);  //eight bit resolution--why? (Jun24?)
+    //ledcAttach(buzzPin, cwFreq, resolution);  //eight bit resolution--why? (Jun24?)
     ledcWrite(buzzPin, dutycycle);
-    while ((millis() - smillis) < sound_ms)
-      ;
+    while ((millis() - smillis) < sound_ms);
     ledcWrite(buzzPin, 0);  //off
   }
   
@@ -439,7 +438,7 @@ void RxStringParse(void) {
     //the start button has been pushed
     MorseChar('o');
   }
-  
+  // u_long cwFreq = 2500;
   void SoundElement(int elementTime) {
     SoundBuzz(cwFreq, elementTime);  //dit
     delay(ditTime);

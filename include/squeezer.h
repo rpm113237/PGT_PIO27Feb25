@@ -16,6 +16,23 @@
 #include <WiFiClient.h>
 #include <WebServer.h>
 #include <ElegantOTA.h>
+
+#define CNCT_LED_BLINK_TIME 1000     //BLINK TIME FOR CONNECT LED
+#define MS_TO_SEC 1000               //convert to secs
+#define CONN_WAIT_TM 25 * MS_TO_SEC  //time to wait to connect
+#define SHAVE_HAIRCUT 0x1b           //use esc for shave and haircut
+#define Battmah 1000
+#define Runmah 70
+#define BattFullTime (Battmah / Runmah) * 60  //in minutes
+
+//NeoPins
+const int NEOPIN = 47; 
+const int NEOPIXELS = 1;    //One LED
+const int Batt_CK_Interval = 100 * MS_TO_SEC;
+//Seems if these have to be declared before TicTwo
+void LEDBlink(void);
+void BatSnsCk(void);
+void RunTimeCheck(void);
 SFE_MAX1704X lipo(MAX1704X_MAX17048);  // Create a MAX17048
 // Preferences prefs;
 WebServer server(80);
@@ -31,10 +48,10 @@ BLEServer* pServer = NULL;
 BLECharacteristic* pTxCharacteristic;
 
 
-#define CNCT_LED_BLINK_TIME 1000     //BLINK TIME FOR CONNECT LED
-#define MS_TO_SEC 1000               //convert to secs
-#define CONN_WAIT_TM 25 * MS_TO_SEC  //time to wait to connect
-#define SHAVE_HAIRCUT 0x1b           //use esc for shave and haircut
+// #define CNCT_LED_BLINK_TIME 1000     //BLINK TIME FOR CONNECT LED
+// #define MS_TO_SEC 1000               //convert to secs
+// #define CONN_WAIT_TM 25 * MS_TO_SEC  //time to wait to connect
+// #define SHAVE_HAIRCUT 0x1b           //use esc for shave and haircut
 
 //Defaults*********************************************************
 
@@ -46,30 +63,30 @@ const int DfltHFRate = 5;       //samples per second
 const int DfltMeanTime = 2;  // Note--period as opposed to Time
 const String DefaultSSID = "McClellan_Workshop";
 const String DefaultPWD = "Rangeland1";
-unsigned int bootCount = 0;  //keep track of how many times since power on TODO--put this in flash
+extern int bootCount;  //keep track of how many times since power on TODO--put this in flash
 
 unsigned long oldmillis;        //to time the states
 unsigned long int el_time = 0;  //elapsed time
 //unsigned long EpochTime;    //for FF reporting
 
-float scaleVal = 0.0;                 //scale data
+extern float scaleVal;                 //scale data
 float scaleCalVal = 8545.85;          //replace with typical number.
 const float scaleCalDeflt = 8545.85;  //measured on SN10
 const int NumWarmup = 10;
 const int NumTare = 10;
-char TxString[25];  // used to transmit
+// char TxString[25];  // used to transmit
 
-bool deviceConnected = false;
-bool oldDeviceConnected = false;
+extern bool deviceConnected;  //defined in main
+extern bool oldDeviceConnected;
 //float txValue = 0;
 String rxValue{};  // so can process outside of callback; maybe not the best idea
 Preferences prefs;
 
 // boolean to control serial diagnostic printouts.
-bool SerOutHF = true;  // if true, serial out HF
-bool SerOutFF = true;  // if true, serial out FF
-bool SerOutMN = true;  // if true, serial out MN
-bool SerOutIdle = true;// if true output idle time
+extern bool SerOutHF;  // if true, serial out HF
+extern bool SerOutFF;  // if true, serial out FF
+extern bool SerOutMN;  // if true, serial out MN
+extern bool SerOutIdle;// if true output idle time
 
 //efine pins
 //HX711 pins:
@@ -81,15 +98,15 @@ const int ShutDownPin = 20;
 const int buzzPin = 48;
 const int RatePin = 45;  // = 0 for 10 sps, 1 for 80 sps
 //NeoPins
-const int NEOPIN = 47; 
-const int NEOPIXELS = 1;    //One LED
+// const int NEOPIN = 47; 
+// const int NEOPIXELS = 1;    //One LED
 
 //const int ADC_addr_rpm = 0X48;
 const int sda_rpm = 5;
 const int scl_rpm = 4;
-double BattVolts = 0; // Variable to keep track of LiPo voltage
-double BattSOC = 0; // Variable to keep track of LiPo state-of-charge (SOC)
-double BattLife;    // calculated from lipo.getchangerate
+extern double BattVolts; // Variable to keep track of LiPo voltage
+extern double BattSOC; // Variable to keep track of LiPo state-of-charge (SOC)
+extern double BattLife;    // calculated from lipo.getchangerate
 //bool alert; // Variable to keep track of whether alert has been triggered
 
 struct ForceStruct {
@@ -127,13 +144,13 @@ struct ForceStruct {
 
 const int VIB_SND_INTERVAL = 1000;  //ms
 
-int ditTime = 75, chSpTime = 225;  //dit and dah
-u_long cwFreq = 2500;
+extern int ditTime, chSpTime;  //dit and dah
+extern u_long cwFreq;
 
 //int freq = 2000;
 const int ledChannel = 0;
-const int resolution = 8;
-int dutycycle = 40;  //127 = 50 percent +/-, max valume
+const int resolution = 8; 
+extern int dutycycle;  //127 = 50 percent +/-, max valume
 
 struct COLORS {
   int RED[3] = { 255, 0, 0 };
@@ -147,22 +164,22 @@ struct COLORS {
 } clrs;
 
 int BlinkTime = CNCT_LED_BLINK_TIME;  //blink ON/OFF TIME; if ==0, ON
-int LEDSelect = 0;                    //0 or 1; make enum
+extern int LEDSelect;                    //0 or 1; make enum
 const int BatSns = 2;
 const int NumADCRdgs = 10;  //number of times to read ADC in floatADC
 //float battvolts = 0.0;
-float Batt_HI_Lvl = 3.6;
-float Batt_OK_Lvl = 3.5;
-float Batt_LO_Lvl = 3.3;
-float BatMultDefault = 0.001448;  //TODO -find the nominal value
-float BatSnsFactor = 0.0;
-const int Batt_CK_Interval = 100 * MS_TO_SEC;
+extern float Batt_HI_Lvl;
+extern float Batt_OK_Lvl;
+extern float Batt_LO_Lvl;
+extern float BatMultDefault;  //TODO -find the nominal value
+extern float BatSnsFactor;
+// const int Batt_CK_Interval = 100 * MS_TO_SEC;
 const int BattWarnPcnt = 40;      //turn connect LED Yellow/Orange
 const int BattCritPcnt = 30;      //turn connect LED Red
 const int BattShutDownPcnt = 20;  //go to Sleep.pcnt
-#define Battmah 1000
-#define Runmah 70
-#define BattFullTime (Battmah / Runmah) * 60  //in minutes
+// #define Battmah 1000
+// #define Runmah 70
+// #define BattFullTime (Battmah / Runmah) * 60  //in minutes
 
 uint16_t SleepTimer;          // in seconds reset if HF> MinForce
 uint32_t SleepTimeMax = 300;  //sleep timeout in sec
@@ -183,17 +200,20 @@ const char* password = PWDstr;
 void setLED(int btime, int clrarray[]);
 void VibSend(void);
 void StringBLETX(String msg, bool SndSer);
-void LEDBlink(void);
-void BatSnsCk(void);
+// void LEDBlink(void);
+// void BatSnsCk(void);
 void BLEReconnect(void);
 void CheckForce(void);
 void RxStringParse(void);
 
-void SoundBuzz(u_long cwFreq = 2500, int sound_ms = 100);
+//void SoundBuzz(u_long cwFreq, int sound_ms = 100);
 void CalibrateADC(String strval);
 void SetFFRate(String valStr);
 void SetHFRate(String valStr);
 void SetEpochTime(String valStr);
+void SetMeanTime(String valStr);
+void SetBootNum(String valStr);
+void SetTotalRunTime(String valStr);
 void ConnectWiFi(void);
 void MorseChar(int cwChar);
 void SetSSID(String ValStr);
@@ -202,7 +222,7 @@ void DoOTA(void);
 void CalibrateScale(String strval);
 void DoTare(void);
 float getFloatADC(int numtimes);
-void RunTimeCheck(void);
+// void RunTimeCheck(void);
 void ResetSwitch(void);
 void GoToSleep(String DSmsg);
 void SendRev(String valStr);

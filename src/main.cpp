@@ -1,18 +1,7 @@
 #include <Arduino.h>
 #include "squeezer.h"
 #include <stdint.h>
-// #include <NimBLEDevice.h>
-// #include <TickTwo.h>
-// #include <Adafruit_NeoPixel.h>
-// #include <HX711.h>
-// #include <SparkFun_MAX1704x_Fuel_Gauge_Arduino_Library.h>  //
-// #include <Wire.h>
-// #include <Preferences.h>
-// //OTA includes--taken from ElegantOTA demo example
-// #include <WiFi.h>
-// #include <WiFiClient.h>
-// #include <WebServer.h>
-// #include <ElegantOTA.h>
+//using namespace std;
 
 // if it is the C3 or other single core ESP32" Use core 0
 #if CONFIG_FREERTOS_UNICORE
@@ -20,6 +9,32 @@ static const BaseType_t app_cpu = 0;
 #else  //otherwise core 1
 static const BaseType_t app_cpu = 1;
 #endif
+int bootCount = 0;
+float scaleVal = 0.0; 
+bool deviceConnected = false;
+bool oldDeviceConnected = false;
+bool SerOutHF = true;  // if true, serial out HF
+bool SerOutFF = true;  // if true, serial out FF
+bool SerOutMN = true;  // if true, serial out MN
+bool SerOutIdle = true;// if true output idle time
+
+double BattVolts = 0; // Variable to keep track of LiPo voltage
+double BattSOC = 0; // Variable to keep track of LiPo state-of-charge (SOC)
+double BattLife;    // calculated from lipo.getchangerate
+
+int ditTime = 75, chSpTime = 225;  //dit and dah
+
+u_long cwFreq = 2500;
+
+int dutycycle = 40;  //127 = 50 percent +/-, max valume
+int LEDSelect = 0;   //0 or 1; make enum
+
+float Batt_HI_Lvl = 3.6;
+float Batt_OK_Lvl = 3.5;
+float Batt_LO_Lvl = 3.3;
+float BatMultDefault = 0.001448;  //TODO -find the nominal value
+float BatSnsFactor = 0.0;
+
 //the c3 seems to run on 0 regardless of where it is set.
 
 // SFE_MAX1704X lipo(MAX1704X_MAX17048);  // Create a MAX17048
@@ -34,7 +49,7 @@ static const BaseType_t app_cpu = 1;
 // BLEServer* pServer = NULL;
 // BLECharacteristic* pTxCharacteristic;
 
-// bool deviceConnected = false;
+//bool deviceConnected = false;
 // bool oldDeviceConnected = false;
 // //float txValue = 0;
 // String rxValue{};  // so can process outside of callback; maybe not the best idea
@@ -98,9 +113,12 @@ void setup() {
   pinMode(ShutDownPin, OUTPUT);    //pulled down with 100K, has to be active high
   digitalWrite(ShutDownPin, LOW);  // race against release. switch should still be closed.
   Serial.begin(115200); 
-  ledcAttachPin(buzzPin,0);
+  ledcAttachPin(buzzPin,ledChannel);
   //ledcSetup() 
-  ledcAttach(buzzPin, cwFreq, resolution);  //eight bit resolution--why? (Jun24?); using for PWM
+  //ledcAttachPin(buzzPin,0);
+  u_int32_t cwFreq= 2500;
+  ledcChangeFrequency(ledChannel,cwFreq,resolution);
+  //ledcAttach(buzzPin, cwFreq, resolution);  //eight bit resolution--why? (Jun24?); using for PWM
   setLED(00, clrs.GREEN);
   LEDBlink();     //Give them a green.
   Soundwakeup();  //wake up feedback
