@@ -42,7 +42,7 @@ TickTwo LEDtimer(LEDBlink, 10, 0, MILLIS);                   //calls LEDBlink, c
 TickTwo BattChecker(BatSnsCk, Batt_CK_Interval, 0, MILLIS);  //checks battery every Batt_Ck_Interval
 TickTwo SleepChecker(RunTimeCheck, 10000, 0, MILLIS);        //check sleeptimers every ten seconds
 
-String REV_LEVEL = "5Jan25 03ec5d0 ";  //last part of commit number
+extern String REV_LEVEL;  //last part of commit number
 
 BLEServer* pServer = NULL;
 BLECharacteristic* pTxCharacteristic;
@@ -79,7 +79,7 @@ const int NumTare = 10;
 extern bool deviceConnected;  //defined in main
 extern bool oldDeviceConnected;
 //float txValue = 0;
-String rxValue{};  // so can process outside of callback; maybe not the best idea
+extern String rxValue;  // so can process outside of callback; maybe not the best idea
 Preferences prefs;
 
 // boolean to control serial diagnostic printouts.
@@ -181,19 +181,19 @@ const int BattShutDownPcnt = 20;  //go to Sleep.pcnt
 // #define Runmah 70
 // #define BattFullTime (Battmah / Runmah) * 60  //in minutes
 
-uint16_t SleepTimer;          // in seconds reset if HF> MinForce
-uint32_t SleepTimeMax = 300;  //sleep timeout in sec
-int MinForce = 1;             //if HF < MinForce, sleeptimer
-uint32_t SleepTimerStart;     // if HF> MinForce, reset SleepTimerStart to current millis()/mstosec
+extern uint16_t SleepTimer;          // in seconds reset if HF> MinForce
+extern uint32_t SleepTimeMax;  //sleep timeout in sec
+extern int MinForce;             //if HF < MinForce, sleeptimer
+extern uint32_t SleepTimerStart;     // if HF> MinForce, reset SleepTimerStart to current millis()/mstosec
 
 //const int numSamples = 2;
-long int scaleRead = 0;
+extern long int scaleRead;
 
 //Flash (preferences.h) setup
-char SSstr[25] = "McClellan_Workshop";  //max from ble is about 20(?)- 2 for tag.
-char PWDstr[25] = "Rangeland1";
-const char* ssid = SSstr;
-const char* password = PWDstr;
+extern char SSstr[25];  //max from ble is about 20(?)- 2 for tag.
+extern char PWDstr[25];
+extern const char* ssid;
+ extern const char* password;
 
 
 //protos

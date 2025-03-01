@@ -35,6 +35,20 @@ float Batt_LO_Lvl = 3.3;
 float BatMultDefault = 0.001448;  //TODO -find the nominal value
 float BatSnsFactor = 0.0;
 
+uint16_t SleepTimer;          // in seconds reset if HF> MinForce
+uint32_t SleepTimeMax = 300;  //sleep timeout in sec
+int MinForce = 1;             //if HF < MinForce, sleeptimer
+uint32_t SleepTimerStart;     // if HF> MinForce, reset SleepTimerStart to current millis()/mstosec
+
+char SSstr[25] = "McClellan_Workshop";  //max from ble is about 20(?)- 2 for tag.
+char PWDstr[25] = "Rangeland1";
+const char* ssid = SSstr;
+const char* password = PWDstr;
+long int scaleRead = 0;
+
+String REV_LEVEL = "5Jan25 03ec5d0 ";  //last part of commit number
+String rxValue;  // so can process outside of callback; maybe not the best idea
+
 //the c3 seems to run on 0 regardless of where it is set.
 
 // SFE_MAX1704X lipo(MAX1704X_MAX17048);  // Create a MAX17048
