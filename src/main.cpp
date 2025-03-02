@@ -48,6 +48,42 @@ long int scaleRead = 0;
 
 String REV_LEVEL = "5Jan25 03ec5d0 ";  //last part of commit number
 String rxValue;  // so can process outside of callback; maybe not the best idea
+Preferences prefs;
+WebServer server(80);
+
+struct Force {
+  /* Force is accumulated and averages calculated based on scale. Reporting is synchronous tied to TickTwo
+  for now; ony rate for FF, HF is settable; the report time will be set as (1000/rate) milliseconds.
+  */
+  unsigned long EpochStart;       //Start of PGT EpochStart in ms
+  unsigned long EpochTime;        //in ms == millis()-EpochStartTime
+  unsigned long TotalRuntime;     //in seconds, in flash, updated at shutdown = millis() - epochstart
+  int BaseRate = BaseSampleRate;  //for Rev1--10 BASERATE #define 80--this is obsolete, I think
+  //float BaseVal;  //updated every sample
+
+  bool FFReport = true;     // if true, report FF
+  int FFRate = DfltFFRate;  //reports/sec
+  int FFReportTime;         //report at this rate (ms)init in timesinit
+  int FFNSamp;
+  unsigned long FFLastReport;  //millis of last report
+  float FFVal;                 //moving average over last BaseRate/FFRate Samples
+
+  bool HFReport = true;
+  int HFRate = DfltHFRate;  //This is the samples per second the scale runs at
+  int HFReportTime;         // number of milliseconds to report at init in inittimes()
+  int HFNSamp;
+  unsigned long HFLastReport;  //millis of last hf report
+  float HFVal;                 //moving average over last BaseRate/HF rate samples
+
+
+  bool MeanReport = true;
+  int MeanTime = DfltMeanTime;  //time(seconds) that Mean is calculated over
+  int MeanReportTime;           // ms to report mean;  calc in inittimes
+  int MNNSamp;
+  unsigned long MeanLastReport;
+  float MeanVal;  //moving average over last MeanTime * BaseRate samples.
+} Force;
+
 
 //the c3 seems to run on 0 regardless of where it is set.
 

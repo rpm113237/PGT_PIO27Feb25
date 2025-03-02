@@ -1,113 +1,94 @@
 #ifndef _SQUEEZER_H
 #define _SQUEEZER_H
-//#ifndef _SQUEEZER_H
-//#define _SQUEEZER_H
-//#include <Adafruit_NeoPixel.h>
-//#include <Arduino.h>   
 #include <NimBLEDevice.h>
 #include <TickTwo.h>
 #include <Adafruit_NeoPixel.h>
 #include <HX711.h>
-#include <SparkFun_MAX1704x_Fuel_Gauge_Arduino_Library.h>  //
+#include <SparkFun_MAX1704x_Fuel_Gauge_Arduino_Library.h> //
 #include <Wire.h>
 #include <Preferences.h>
-//OTA includes--taken from ElegantOTA demo example
+// OTA includes--taken from ElegantOTA demo example
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <WebServer.h>
 #include <ElegantOTA.h>
 
-#define CNCT_LED_BLINK_TIME 1000     //BLINK TIME FOR CONNECT LED
-#define MS_TO_SEC 1000               //convert to secs
-#define CONN_WAIT_TM 25 * MS_TO_SEC  //time to wait to connect
-#define SHAVE_HAIRCUT 0x1b           //use esc for shave and haircut
-#define Battmah 1000
-#define Runmah 70
-#define BattFullTime (Battmah / Runmah) * 60  //in minutes
+// NeoPins
+extern const int NEOPIN;
+extern const int NEOPIXELS; // One LED
+extern const int Batt_CK_Interval;
 
-//NeoPins
-const int NEOPIN = 47; 
-const int NEOPIXELS = 1;    //One LED
-const int Batt_CK_Interval = 100 * MS_TO_SEC;
-//Seems if these have to be declared before TicTwo
-void LEDBlink(void);
-void BatSnsCk(void);
-void RunTimeCheck(void);
-SFE_MAX1704X lipo(MAX1704X_MAX17048);  // Create a MAX17048
+extern const long int Batt_CK_Interval;
+extern const int CNCT_LED_BLINK_TIME; // BLINK TIME FOR CONNECT LED
+extern const long int CONN_WAIT_TM;   // time to wait to connect
+extern const int SHAVE_HAIRCUT;       // use esc for shave and haircut
+extern const int Battmah;
+extern const int Runmah;
+extern const int BattFullTime; // in minutes
+
+// Seems if these have to be declared before TicTwo
+
+SFE_MAX1704X lipo(MAX1704X_MAX17048); // Create a MAX17048
 // Preferences prefs;
-WebServer server(80);
+extern WebServer server;
 HX711 scale;
-Adafruit_NeoPixel pixels(NEOPIXELS, NEOPIN, NEO_GRB + NEO_KHZ800);  //1 ea sk6812 on IO 8
-TickTwo LEDtimer(LEDBlink, 10, 0, MILLIS);                   //calls LEDBlink, called every 10MS, repeats forever, resolution MS
-TickTwo BattChecker(BatSnsCk, Batt_CK_Interval, 0, MILLIS);  //checks battery every Batt_Ck_Interval
-TickTwo SleepChecker(RunTimeCheck, 10000, 0, MILLIS);        //check sleeptimers every ten seconds
+Adafruit_NeoPixel pixels(NEOPIXELS, NEOPIN, NEO_GRB + NEO_KHZ800); // 1 ea sk6812 on IO 8
+TickTwo LEDtimer(LEDBlink, 10, 0, MILLIS);                         // calls LEDBlink, called every 10MS, repeats forever, resolution MS
+TickTwo BattChecker(BatSnsCk, Batt_CK_Interval, 0, MILLIS);        // checks battery every Batt_Ck_Interval
+TickTwo SleepChecker(RunTimeCheck, 10000, 0, MILLIS);              // check sleeptimers every ten seconds
 
-extern String REV_LEVEL;  //last part of commit number
+extern String REV_LEVEL; // last part of commit number
 
-BLEServer* pServer = NULL;
-BLECharacteristic* pTxCharacteristic;
+BLEServer *pServer = NULL;
+BLECharacteristic *pTxCharacteristic;
 
+// Note--number of samples are caclulated in timesinit(); i.e HFrate = 5 => 80/6 = 16 samples
+extern const int BaseSampleRate; // scale 80 sps
+extern const int DfltFFRate;     // samples persecond
+extern const int DfltHFRate;      // samples per second
 
-// #define CNCT_LED_BLINK_TIME 1000     //BLINK TIME FOR CONNECT LED
-// #define MS_TO_SEC 1000               //convert to secs
-// #define CONN_WAIT_TM 25 * MS_TO_SEC  //time to wait to connect
-// #define SHAVE_HAIRCUT 0x1b           //use esc for shave and haircut
+extern const int DfltMeanTime; // Note--period as opposed to Time
+extern const String DefaultSSID;
+extern const String DefaultPWD;
+extern int bootCount; // keep track of how many times since power on TODO--put this in flash
 
-//Defaults*********************************************************
+extern unsigned long oldmillis;       // to time the states
+extern unsigned long int el_time; // elapsed time
+// unsigned long EpochTime;    //for FF reporting
 
-//Note--number of samples are caclulated in timesinit(); i.e HFrate = 5 => 80/6 = 16 samples
-const int BaseSampleRate = 80;  //scale 80 sps
-const int DfltFFRate = 20;      // samples persecond
-const int DfltHFRate = 5;       //samples per second
-//const int DefaultHFReportTime = 200;  //ms
-const int DfltMeanTime = 2;  // Note--period as opposed to Time
-const String DefaultSSID = "McClellan_Workshop";
-const String DefaultPWD = "Rangeland1";
-extern int bootCount;  //keep track of how many times since power on TODO--put this in flash
-
-unsigned long oldmillis;        //to time the states
-unsigned long int el_time = 0;  //elapsed time
-//unsigned long EpochTime;    //for FF reporting
-
-extern float scaleVal;                 //scale data
-float scaleCalVal = 8545.85;          //replace with typical number.
-const float scaleCalDeflt = 8545.85;  //measured on SN10
-const int NumWarmup = 10;
-const int NumTare = 10;
+extern float scaleVal;               // scale data
+extern const float scaleCalDeflt; // measured on SN10
+extern const int NumWarmup = 10;
+extern const int NumTare = 10;
 // char TxString[25];  // used to transmit
 
-extern bool deviceConnected;  //defined in main
+extern bool deviceConnected; // defined in main
 extern bool oldDeviceConnected;
-//float txValue = 0;
-extern String rxValue;  // so can process outside of callback; maybe not the best idea
-Preferences prefs;
+// float txValue = 0;
+extern String rxValue; // so can process outside of callback; maybe not the best idea
+extern Preferences prefs;
 
 // boolean to control serial diagnostic printouts.
-extern bool SerOutHF;  // if true, serial out HF
-extern bool SerOutFF;  // if true, serial out FF
-extern bool SerOutMN;  // if true, serial out MN
-extern bool SerOutIdle;// if true output idle time
+extern bool SerOutHF;   // if true, serial out HF
+extern bool SerOutFF;   // if true, serial out FF
+extern bool SerOutMN;   // if true, serial out MN
+extern bool SerOutIdle; // if true output idle time
 
-//efine pins
-//HX711 pins:
-const int HX711_dout = 39;  //mcu > HX711 dout pin
-const int HX711_sck = 38;   //mcu > HX711 sck pin
-//GPIO
-const int StartButton = 21;  //
-const int ShutDownPin = 20;
-const int buzzPin = 48;
-const int RatePin = 45;  // = 0 for 10 sps, 1 for 80 sps
-//NeoPins
-// const int NEOPIN = 47; 
-// const int NEOPIXELS = 1;    //One LED
+// define pins
+// HX711 pins:
+extern const int HX711_dout = 39; // mcu > HX711 dout pin
+extern const int HX711_sck = 38;  // mcu > HX711 sck pin
+// GPIO
+extern const int StartButton = 21; //
+extern const int ShutDownPin = 20;
+extern const int buzzPin = 48;
+extern const int RatePin = 45; // = 0 for 10 sps, 1 for 80 sps
+extern const int sda_rpm = 5;
+extern const int scl_rpm = 4;
 
-//const int ADC_addr_rpm = 0X48;
-const int sda_rpm = 5;
-const int scl_rpm = 4;
 extern double BattVolts; // Variable to keep track of LiPo voltage
-extern double BattSOC; // Variable to keep track of LiPo state-of-charge (SOC)
-extern double BattLife;    // calculated from lipo.getchangerate
-//bool alert; // Variable to keep track of whether alert has been triggered
+extern double BattSOC;   // Variable to keep track of LiPo state-of-charge (SOC)
+extern double BattLife;  // calculated from lipo.getchangerate
 
 struct ForceStruct {
   /* Force is accumulated and averages calculated based on scale. Reporting is synchronous tied to TickTwo
@@ -133,7 +114,6 @@ struct ForceStruct {
   unsigned long HFLastReport;  //millis of last hf report
   float HFVal;                 //moving average over last BaseRate/HF rate samples
 
-
   bool MeanReport = true;
   int MeanTime = DfltMeanTime;  //time(seconds) that Mean is calculated over
   int MeanReportTime;           // ms to report mean;  calc in inittimes
@@ -141,64 +121,70 @@ struct ForceStruct {
   unsigned long MeanLastReport;
   float MeanVal;  //moving average over last MeanTime * BaseRate samples.
 } Force;
+extern struct Force;
 
-const int VIB_SND_INTERVAL = 1000;  //ms
+const int VIB_SND_INTERVAL = 1000; // ms
 
-extern int ditTime, chSpTime;  //dit and dah
+extern int ditTime, chSpTime; // dit and dah
 extern u_long cwFreq;
 
-//int freq = 2000;
+// int freq = 2000;
 const int ledChannel = 0;
-const int resolution = 8; 
-extern int dutycycle;  //127 = 50 percent +/-, max valume
+const int resolution = 8;
+extern int dutycycle; // 127 = 50 percent +/-, max valume
 
-struct COLORS {
-  int RED[3] = { 255, 0, 0 };
-  int GREEN[3] = { 0, 255, 0 };
-  int BLUE[3] = { 0, 0, 255 };
-  int YELLOW[3] = { 255, 255, 0 };
-  int WHITE[3] = { 255, 255, 255 };
-  int OFF[3] = { 0, 0, 0 };
-  int WKCLRS[3] = { 0, 0, 0 };  //used for the LED task.
+struct COLORS
+{
+  int RED[3] = {255, 0, 0};
+  int GREEN[3] = {0, 255, 0};
+  int BLUE[3] = {0, 0, 255};
+  int YELLOW[3] = {255, 255, 0};
+  int WHITE[3] = {255, 255, 255};
+  int OFF[3] = {0, 0, 0};
+  int WKCLRS[3] = {0, 0, 0}; // used for the LED task.
 
 } clrs;
 
-int BlinkTime = CNCT_LED_BLINK_TIME;  //blink ON/OFF TIME; if ==0, ON
-extern int LEDSelect;                    //0 or 1; make enum
+int BlinkTime = CNCT_LED_BLINK_TIME; // blink ON/OFF TIME; if ==0, ON
+extern int LEDSelect;                // 0 or 1; make enum
 const int BatSns = 2;
-const int NumADCRdgs = 10;  //number of times to read ADC in floatADC
-//float battvolts = 0.0;
+const int NumADCRdgs = 10; // number of times to read ADC in floatADC
+// float battvolts = 0.0;
 extern float Batt_HI_Lvl;
 extern float Batt_OK_Lvl;
 extern float Batt_LO_Lvl;
-extern float BatMultDefault;  //TODO -find the nominal value
+extern float BatMultDefault; // TODO -find the nominal value
 extern float BatSnsFactor;
 // const int Batt_CK_Interval = 100 * MS_TO_SEC;
-const int BattWarnPcnt = 40;      //turn connect LED Yellow/Orange
-const int BattCritPcnt = 30;      //turn connect LED Red
-const int BattShutDownPcnt = 20;  //go to Sleep.pcnt
+const int BattWarnPcnt = 40;     // turn connect LED Yellow/Orange
+const int BattCritPcnt = 30;     // turn connect LED Red
+const int BattShutDownPcnt = 20; // go to Sleep.pcnt
 // #define Battmah 1000
 // #define Runmah 70
 // #define BattFullTime (Battmah / Runmah) * 60  //in minutes
 
-extern uint16_t SleepTimer;          // in seconds reset if HF> MinForce
-extern uint32_t SleepTimeMax;  //sleep timeout in sec
-extern int MinForce;             //if HF < MinForce, sleeptimer
-extern uint32_t SleepTimerStart;     // if HF> MinForce, reset SleepTimerStart to current millis()/mstosec
+extern uint16_t SleepTimer;      // in seconds reset if HF> MinForce
+extern uint32_t SleepTimeMax;    // sleep timeout in sec
+extern int MinForce;             // if HF < MinForce, sleeptimer
+extern uint32_t SleepTimerStart; // if HF> MinForce, reset SleepTimerStart to current millis()/mstosec
 
-//const int numSamples = 2;
+// const int numSamples = 2;
 extern long int scaleRead;
 
-//Flash (preferences.h) setup
-extern char SSstr[25];  //max from ble is about 20(?)- 2 for tag.
+// Flash (preferences.h) setup
+extern char SSstr[25]; // max from ble is about 20(?)- 2 for tag.
 extern char PWDstr[25];
-extern const char* ssid;
- extern const char* password;
+extern const char *ssid;
+extern const char *password;
 
-
-//protos
+// protos
 void setLED(int btime, int clrarray[]);
 void VibSend(void);
+
+void LEDBlink(void);
+void BatSnsCk(void);
+void RunTimeCheck(void);
+
 void StringBLETX(String msg, bool SndSer);
 // void LEDBlink(void);
 // void BatSnsCk(void);
@@ -206,7 +192,7 @@ void BLEReconnect(void);
 void CheckForce(void);
 void RxStringParse(void);
 
-//void SoundBuzz(u_long cwFreq, int sound_ms = 100);
+// void SoundBuzz(u_long cwFreq, int sound_ms = 100);
 void CalibrateADC(String strval);
 void SetFFRate(String valStr);
 void SetHFRate(String valStr);
