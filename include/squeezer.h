@@ -45,18 +45,18 @@ BLECharacteristic *pTxCharacteristic;
 // Note--number of samples are caclulated in timesinit(); i.e HFrate = 5 => 80/6 = 16 samples
 extern const int BaseSampleRate; // scale 80 sps
 extern const int DfltFFRate;     // samples persecond
-extern const int DfltHFRate;      // samples per second
+extern const int DfltHFRate;     // samples per second
 
 extern const int DfltMeanTime; // Note--period as opposed to Time
 extern const String DefaultSSID;
 extern const String DefaultPWD;
 extern int bootCount; // keep track of how many times since power on TODO--put this in flash
 
-extern unsigned long oldmillis;       // to time the states
+extern unsigned long oldmillis;   // to time the states
 extern unsigned long int el_time; // elapsed time
 // unsigned long EpochTime;    //for FF reporting
 
-extern float scaleVal;               // scale data
+extern float scaleVal;            // scale data
 extern const float scaleCalDeflt; // measured on SN10
 extern const int NumWarmup = 10;
 extern const int NumTare = 10;
@@ -90,60 +90,64 @@ extern double BattVolts; // Variable to keep track of LiPo voltage
 extern double BattSOC;   // Variable to keep track of LiPo state-of-charge (SOC)
 extern double BattLife;  // calculated from lipo.getchangerate
 
-struct ForceStruct {
+struct ForceStruct
+{
   /* Force is accumulated and averages calculated based on scale. Reporting is synchronous tied to TickTwo
   for now; ony rate for FF, HF is settable; the report time will be set as (1000/rate) milliseconds.
   */
-  unsigned long EpochStart;       //Start of PGT EpochStart in ms
-  unsigned long EpochTime;        //in ms == millis()-EpochStartTime
-  unsigned long TotalRuntime;     //in seconds, in flash, updated at shutdown = millis() - epochstart
-  int BaseRate = BaseSampleRate;  //for Rev1--10 BASERATE #define 80--this is obsolete, I think
-  //float BaseVal;  //updated every sample
+  unsigned long EpochStart;      // Start of PGT EpochStart in ms
+  unsigned long EpochTime;       // in ms == millis()-EpochStartTime
+  unsigned long TotalRuntime;    // in seconds, in flash, updated at shutdown = millis() - epochstart
+  int BaseRate = BaseSampleRate; // for Rev1--10 BASERATE #define 80--this is obsolete, I think
+  // float BaseVal;  //updated every sample
 
-  bool FFReport = true;     // if true, report FF
-  int FFRate = DfltFFRate;  //reports/sec
-  int FFReportTime;         //report at this rate (ms)init in timesinit
+  bool FFReport = true;    // if true, report FF
+  int FFRate = DfltFFRate; // reports/sec
+  int FFReportTime;        // report at this rate (ms)init in timesinit
   int FFNSamp;
-  unsigned long FFLastReport;  //millis of last report
-  float FFVal;                 //moving average over last BaseRate/FFRate Samples
+  unsigned long FFLastReport; // millis of last report
+  float FFVal;                // moving average over last BaseRate/FFRate Samples
 
   bool HFReport = true;
-  int HFRate = DfltHFRate;  //This is the samples per second the scale runs at
-  int HFReportTime;         // number of milliseconds to report at init in inittimes()
+  int HFRate = DfltHFRate; // This is the samples per second the scale runs at
+  int HFReportTime;        // number of milliseconds to report at init in inittimes()
   int HFNSamp;
-  unsigned long HFLastReport;  //millis of last hf report
-  float HFVal;                 //moving average over last BaseRate/HF rate samples
+  unsigned long HFLastReport; // millis of last hf report
+  float HFVal;                // moving average over last BaseRate/HF rate samples
 
   bool MeanReport = true;
-  int MeanTime = DfltMeanTime;  //time(seconds) that Mean is calculated over
-  int MeanReportTime;           // ms to report mean;  calc in inittimes
+  int MeanTime = DfltMeanTime; // time(seconds) that Mean is calculated over
+  int MeanReportTime;          // ms to report mean;  calc in inittimes
   int MNNSamp;
   unsigned long MeanLastReport;
-  float MeanVal;  //moving average over last MeanTime * BaseRate samples.
-} Force;
-extern struct Force;
+  float MeanVal; // moving average over last MeanTime * BaseRate samples.
+};
+extern struct ForceStruct Force;
 
-const int VIB_SND_INTERVAL = 1000; // ms
+extern const int VIB_SND_INTERVAL; // = 1000; // ms
 
-extern int ditTime, chSpTime; // dit and dah
+extern const int ditTime, chSpTime; // dit and dah
 extern u_long cwFreq;
 
 // int freq = 2000;
-const int ledChannel = 0;
-const int resolution = 8;
+extern const int ledChannel;
+extern const int resolution;
 extern int dutycycle; // 127 = 50 percent +/-, max valume
 
 struct COLORS
 {
-  int RED[3] = {255, 0, 0};
-  int GREEN[3] = {0, 255, 0};
+  int RED[3];
+  int GREEN[3];
   int BLUE[3] = {0, 0, 255};
   int YELLOW[3] = {255, 255, 0};
   int WHITE[3] = {255, 255, 255};
   int OFF[3] = {0, 0, 0};
   int WKCLRS[3] = {0, 0, 0}; // used for the LED task.
 
-} clrs;
+};
+extern struct COLORS clrs;
+
+extern int tstarray[4];
 
 int BlinkTime = CNCT_LED_BLINK_TIME; // blink ON/OFF TIME; if ==0, ON
 extern int LEDSelect;                // 0 or 1; make enum

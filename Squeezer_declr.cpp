@@ -37,7 +37,7 @@ const int DfltHFRate = 5;      // samples per second
 const int DfltMeanTime = 2; // Note--period as opposed to Time
 const String DefaultSSID = "McClellan_Workshop";
 const String DefaultPWD = "Rangeland1";
-extern int bootCount=0; // keep track of how many times since power on TODO--put this in flash
+extern int bootCount = 0; // keep track of how many times since power on TODO--put this in flash
 
 unsigned long oldmillis;       // to time the states
 unsigned long int el_time = 0; // elapsed time
@@ -54,34 +54,44 @@ bool oldDeviceConnected;
 String rxValue; // so can process outside of callback; maybe not the best idea
 Preferences prefs;
 
-struct ForceStruct {
-    /* Force is accumulated and averages calculated based on scale. Reporting is synchronous tied to TickTwo
-    for now; ony rate for FF, HF is settable; the report time will be set as (1000/rate) milliseconds.
-    */
-    unsigned long EpochStart;       //Start of PGT EpochStart in ms
-    unsigned long EpochTime;        //in ms == millis()-EpochStartTime
-    unsigned long TotalRuntime;     //in seconds, in flash, updated at shutdown = millis() - epochstart
-    int BaseRate = BaseSampleRate;  //for Rev1--10 BASERATE #define 80--this is obsolete, I think
-    //float BaseVal;  //updated every sample
-  
-    bool FFReport = true;     // if true, report FF
-    int FFRate = DfltFFRate;  //reports/sec
-    int FFReportTime;         //report at this rate (ms)init in timesinit
-    int FFNSamp;
-    unsigned long FFLastReport;  //millis of last report
-    float FFVal;                 //moving average over last BaseRate/FFRate Samples
-  
-    bool HFReport = true;
-    int HFRate = DfltHFRate;  //This is the samples per second the scale runs at
-    int HFReportTime;         // number of milliseconds to report at init in inittimes()
-    int HFNSamp;
-    unsigned long HFLastReport;  //millis of last hf report
-    float HFVal;                 //moving average over last BaseRate/HF rate samples
-  
-    bool MeanReport = true;
-    int MeanTime = DfltMeanTime;  //time(seconds) that Mean is calculated over
-    int MeanReportTime;           // ms to report mean;  calc in inittimes
-    int MNNSamp;
-    unsigned long MeanLastReport;
-    float MeanVal;  //moving average over last MeanTime * BaseRate samples.
-}  
+struct ForceStruct Force; 
+int initForce(void) // painful way to do it--has to be better way
+{
+    Force.BaseRate = BaseSampleRate;
+
+    Force.FFReport = true;
+    Force.FFRate = DfltFFRate; // reports/sec
+    Force.HFReport = true;
+    Force.HFRate = DfltHFRate; // This is the samples per second the scale runs at
+    Force.HFLastReport;        // millis of last hf report
+
+    Force.MeanReport = true;
+    Force.MeanTime = DfltMeanTime; // time(seconds) that Mean is calculated over
+}
+const int VIB_SND_INTERVAL = 1000; // ms
+const int ditTime = 75, chSpTime = 225;  //dit and dah
+u_long cwFreq = 2500;
+
+// int freq = 2000;
+const int ledChannel = 0;
+const int resolution = 8;
+int dutycycle= 30; // 127 = 50 percent +/-, max valume
+int tstarray[4]= {1,2,3,4};
+struct COLORS clrs;
+
+void init_clrs(void){
+    clrs.RED[0] = 255;
+    clrs.RED[1] = 0;
+    clrs.RED[2] = 0;    
+  //clrs.RED[3] = {255, 0, 0};
+  clrs.GREEN[0]= 0; clrs.GREEN[1]=255; clrs.GREEN[2]= 0;
+  //clrs.GREEN[3] = {0, 255, 0};
+  clrs.BLUE[0] = 0;clrs.BLUE[1] = 0;clrs.BLUE[2] = 255;
+//   clrs.BLUE[3] = {0, 0, 255};
+//  clrs.YELLOW[3] = {255, 255, 0};
+  clrs.WHITE[3] = {255, 255, 255};
+  clrs.OFF[3] = {0, 0, 0};
+  clrs.WKCLRS[3] = {0, 0, 0}; // used for the LED task.
+
+}
+

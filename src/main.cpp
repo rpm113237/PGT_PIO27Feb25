@@ -22,9 +22,7 @@ double BattVolts = 0; // Variable to keep track of LiPo voltage
 double BattSOC = 0; // Variable to keep track of LiPo state-of-charge (SOC)
 double BattLife;    // calculated from lipo.getchangerate
 
-int ditTime = 75, chSpTime = 225;  //dit and dah
 
-u_long cwFreq = 2500;
 
 int dutycycle = 40;  //127 = 50 percent +/-, max valume
 int LEDSelect = 0;   //0 or 1; make enum
