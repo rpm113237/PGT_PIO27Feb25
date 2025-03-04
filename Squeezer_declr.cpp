@@ -1,5 +1,15 @@
 #include "squeezer.h";
-#define MS_TO_SEC 1000 // convert to secs
+TickTwo LEDtimer(LEDBlink, 10, 0, MILLIS);                         // calls LEDBlink, called every 10MS, repeats forever, resolution MS
+TickTwo BattChecker(BatSnsCk, Batt_CK_Interval, 0, MILLIS);        // checks battery every Batt_Ck_Interval
+TickTwo SleepChecker(RunTimeCheck, 10000, 0, MILLIS);              // check sleeptimers every ten seconds
+
+//#define MS_TO_SEC 1000 // convert to secs
+String REV_LEVEL = "5Jan25 03ec5d0 ";  //last part of commit number
+char SSstr[25] = "McClellan_Workshop";  //max from ble is about 20(?)- 2 for tag.
+char PWDstr[25] = "Rangeland1";
+const char* ssid = SSstr;
+const char* password = PWDstr;
+long int scaleRead = 0;
 
 // NeoPins
 const int NEOPIN = 47;
@@ -37,22 +47,42 @@ const int DfltHFRate = 5;      // samples per second
 const int DfltMeanTime = 2; // Note--period as opposed to Time
 const String DefaultSSID = "McClellan_Workshop";
 const String DefaultPWD = "Rangeland1";
-extern int bootCount = 0; // keep track of how many times since power on TODO--put this in flash
+int bootCount=0; // keep track of how many times since power on TODO--put this in flash
 
 unsigned long oldmillis;       // to time the states
 unsigned long int el_time = 0; // elapsed time
 // unsigned long EpochTime;    //for FF reporting
-
+float scaleCalVal;
+float scaleVal =0.0;
 float scaleCalVal = 8545.85;         // replace with typical number.
 const float scaleCalDeflt = 8545.85; // measured on SN10
 const int NumWarmup = 10;
 const int NumTare = 10;
 
-bool deviceConnected; // defined in main
-bool oldDeviceConnected;
+bool deviceConnected = false; // defined in main
+bool oldDeviceConnected =false;
 // float txValue = 0;
 String rxValue; // so can process outside of callback; maybe not the best idea
 Preferences prefs;
+
+bool SerOutHF = true;  // if true, serial out HF
+bool SerOutFF = true;  // if true, serial out FF
+bool SerOutMN = true;  // if true, serial out MN
+bool SerOutIdle = true;// if true output idle time
+
+bool SerOutHF = true;  // if true, serial out HF
+bool SerOutFF = true;  // if true, serial out FF
+bool SerOutMN = true;  // if true, serial out MN
+bool SerOutIdle = true;// if true output idle time
+
+double BattVolts = 0; // Variable to keep track of LiPo voltage
+double BattSOC = 0; // Variable to keep track of LiPo state-of-charge (SOC)
+double BattLife;    // calculated from lipo.getchangerate
+float Batt_HI_Lvl = 3.6;
+float Batt_OK_Lvl = 3.5;
+float Batt_LO_Lvl = 3.3;
+float BatMultDefault = 0.001448;  //TODO -find the nominal value
+float BatSnsFactor = 0.0;
 
 struct ForceStruct Force; 
 int initForce(void) // painful way to do it--has to be better way
@@ -72,26 +102,36 @@ const int VIB_SND_INTERVAL = 1000; // ms
 const int ditTime = 75, chSpTime = 225;  //dit and dah
 u_long cwFreq = 2500;
 
-// int freq = 2000;
 const int ledChannel = 0;
 const int resolution = 8;
 int dutycycle= 30; // 127 = 50 percent +/-, max valume
-int tstarray[4]= {1,2,3,4};
+
 struct COLORS clrs;
 
-void init_clrs(void){
-    clrs.RED[0] = 255;
-    clrs.RED[1] = 0;
-    clrs.RED[2] = 0;    
-  //clrs.RED[3] = {255, 0, 0};
-  clrs.GREEN[0]= 0; clrs.GREEN[1]=255; clrs.GREEN[2]= 0;
-  //clrs.GREEN[3] = {0, 255, 0};
-  clrs.BLUE[0] = 0;clrs.BLUE[1] = 0;clrs.BLUE[2] = 255;
-//   clrs.BLUE[3] = {0, 0, 255};
-//  clrs.YELLOW[3] = {255, 255, 0};
-  clrs.WHITE[3] = {255, 255, 255};
-  clrs.OFF[3] = {0, 0, 0};
-  clrs.WKCLRS[3] = {0, 0, 0}; // used for the LED task.
 
-}
+int BlinkTime = CNCT_LED_BLINK_TIME; // blink ON/OFF TIME; if ==0, ON
+int LEDSelect =0;                // 0 or 1; make enum
+const int BatSns = 2;
+const int NumADCRdgs = 10; // number of times to read ADC in floatADC
+// float battvolts = 0.0;
+float Batt_HI_Lvl;
+float Batt_OK_Lvl;
+float Batt_LO_Lvl;
+float BatMultDefault; // TODO -find the nominal value
+float BatSnsFactor;
+const int MS_TO_SEC =1000;
+const int BattWarnPcnt = 40;     // turn connect LED Yellow/Orange
+const int BattCritPcnt = 30;     // turn connect LED Red
+const int BattShutDownPcnt = 20; // go to Sleep.pcnt
+// #define Battmah 1000
+// #define Runmah 70
+// #define BattFullTime (Battmah / Runmah) * 60  //in minutes
+
+uint16_t SleepTimer;      // in seconds reset if HF> MinForce
+uint32_t SleepTimeMax = 300;    // sleep timeout in sec
+int MinForce =1;             // if HF < MinForce, sleeptimer
+uint32_t SleepTimerStart; // if HF> MinForce, reset SleepTimerStart to current millis()/mstosec
+
+// const int numSamples = 2;
+long int scaleRead;
 

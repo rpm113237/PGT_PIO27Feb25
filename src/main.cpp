@@ -9,98 +9,11 @@ static const BaseType_t app_cpu = 0;
 #else  //otherwise core 1
 static const BaseType_t app_cpu = 1;
 #endif
-int bootCount = 0;
-float scaleVal = 0.0; 
-bool deviceConnected = false;
-bool oldDeviceConnected = false;
-bool SerOutHF = true;  // if true, serial out HF
-bool SerOutFF = true;  // if true, serial out FF
-bool SerOutMN = true;  // if true, serial out MN
-bool SerOutIdle = true;// if true output idle time
-
-double BattVolts = 0; // Variable to keep track of LiPo voltage
-double BattSOC = 0; // Variable to keep track of LiPo state-of-charge (SOC)
-double BattLife;    // calculated from lipo.getchangerate
 
 
-
-int dutycycle = 40;  //127 = 50 percent +/-, max valume
-int LEDSelect = 0;   //0 or 1; make enum
-
-float Batt_HI_Lvl = 3.6;
-float Batt_OK_Lvl = 3.5;
-float Batt_LO_Lvl = 3.3;
-float BatMultDefault = 0.001448;  //TODO -find the nominal value
-float BatSnsFactor = 0.0;
-
-uint16_t SleepTimer;          // in seconds reset if HF> MinForce
-uint32_t SleepTimeMax = 300;  //sleep timeout in sec
-int MinForce = 1;             //if HF < MinForce, sleeptimer
-uint32_t SleepTimerStart;     // if HF> MinForce, reset SleepTimerStart to current millis()/mstosec
-
-char SSstr[25] = "McClellan_Workshop";  //max from ble is about 20(?)- 2 for tag.
-char PWDstr[25] = "Rangeland1";
-const char* ssid = SSstr;
-const char* password = PWDstr;
-long int scaleRead = 0;
-
-String REV_LEVEL = "5Jan25 03ec5d0 ";  //last part of commit number
 String rxValue;  // so can process outside of callback; maybe not the best idea
 Preferences prefs;
 WebServer server(80);
-
-struct Force {
-  /* Force is accumulated and averages calculated based on scale. Reporting is synchronous tied to TickTwo
-  for now; ony rate for FF, HF is settable; the report time will be set as (1000/rate) milliseconds.
-  */
-  unsigned long EpochStart;       //Start of PGT EpochStart in ms
-  unsigned long EpochTime;        //in ms == millis()-EpochStartTime
-  unsigned long TotalRuntime;     //in seconds, in flash, updated at shutdown = millis() - epochstart
-  int BaseRate = BaseSampleRate;  //for Rev1--10 BASERATE #define 80--this is obsolete, I think
-  //float BaseVal;  //updated every sample
-
-  bool FFReport = true;     // if true, report FF
-  int FFRate = DfltFFRate;  //reports/sec
-  int FFReportTime;         //report at this rate (ms)init in timesinit
-  int FFNSamp;
-  unsigned long FFLastReport;  //millis of last report
-  float FFVal;                 //moving average over last BaseRate/FFRate Samples
-
-  bool HFReport = true;
-  int HFRate = DfltHFRate;  //This is the samples per second the scale runs at
-  int HFReportTime;         // number of milliseconds to report at init in inittimes()
-  int HFNSamp;
-  unsigned long HFLastReport;  //millis of last hf report
-  float HFVal;                 //moving average over last BaseRate/HF rate samples
-
-
-  bool MeanReport = true;
-  int MeanTime = DfltMeanTime;  //time(seconds) that Mean is calculated over
-  int MeanReportTime;           // ms to report mean;  calc in inittimes
-  int MNNSamp;
-  unsigned long MeanLastReport;
-  float MeanVal;  //moving average over last MeanTime * BaseRate samples.
-} Force;
-
-
-//the c3 seems to run on 0 regardless of where it is set.
-
-// SFE_MAX1704X lipo(MAX1704X_MAX17048);  // Create a MAX17048
-// // Preferences prefs;
-// WebServer server(80);
-// HX711 scale;
-// Adafruit_NeoPixel pixels(NEOPIXELS, NEOPIN, NEO_GRB + NEO_KHZ800);  //1 ea sk6812 on IO 8
-// TickTwo LEDtimer(LEDBlink, 10, 0, MILLIS);                   //calls LEDBlink, called every 10MS, repeats forever, resolution MS
-// TickTwo BattChecker(BatSnsCk, Batt_CK_Interval, 0, MILLIS);  //checks battery every Batt_Ck_Interval
-// TickTwo SleepChecker(RunTimeCheck, 10000, 0, MILLIS);        //check sleeptimers every ten seconds
-
-// BLEServer* pServer = NULL;
-// BLECharacteristic* pTxCharacteristic;
-
-//bool deviceConnected = false;
-// bool oldDeviceConnected = false;
-// //float txValue = 0;
-// String rxValue{};  // so can process outside of callback; maybe not the best idea
 
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/

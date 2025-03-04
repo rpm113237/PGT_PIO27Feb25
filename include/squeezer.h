@@ -13,10 +13,13 @@
 #include <WebServer.h>
 #include <ElegantOTA.h>
 
+//used to be defines
+extern const int MS_TO_SEC;
+
 // NeoPins
 extern const int NEOPIN;
 extern const int NEOPIXELS; // One LED
-extern const int Batt_CK_Interval;
+extern const long int Batt_CK_Interval;
 
 extern const long int Batt_CK_Interval;
 extern const int CNCT_LED_BLINK_TIME; // BLINK TIME FOR CONNECT LED
@@ -33,9 +36,13 @@ SFE_MAX1704X lipo(MAX1704X_MAX17048); // Create a MAX17048
 extern WebServer server;
 HX711 scale;
 Adafruit_NeoPixel pixels(NEOPIXELS, NEOPIN, NEO_GRB + NEO_KHZ800); // 1 ea sk6812 on IO 8
-TickTwo LEDtimer(LEDBlink, 10, 0, MILLIS);                         // calls LEDBlink, called every 10MS, repeats forever, resolution MS
-TickTwo BattChecker(BatSnsCk, Batt_CK_Interval, 0, MILLIS);        // checks battery every Batt_Ck_Interval
-TickTwo SleepChecker(RunTimeCheck, 10000, 0, MILLIS);              // check sleeptimers every ten seconds
+// TickTwo LEDtimer(LEDBlink, 10, 0, MILLIS);                         // calls LEDBlink, called every 10MS, repeats forever, resolution MS
+extern TickTwo LEDtimer();  // calls LEDBlink, called every 10MS, repeats forever, resolution MS
+extern TickTwo BattChecker();        // checks battery every Batt_Ck_Interval
+extern TickTwo SleepChecker();              // check sleeptimers every ten seconds
+
+// TickTwo BattChecker(BatSnsCk, Batt_CK_Interval, 0, MILLIS);        // checks battery every Batt_Ck_Interval
+// TickTwo SleepChecker(RunTimeCheck, 10000, 0, MILLIS);              // check sleeptimers every ten seconds
 
 extern String REV_LEVEL; // last part of commit number
 
@@ -57,6 +64,7 @@ extern unsigned long int el_time; // elapsed time
 // unsigned long EpochTime;    //for FF reporting
 
 extern float scaleVal;            // scale data
+extern float scaleCalVal;
 extern const float scaleCalDeflt; // measured on SN10
 extern const int NumWarmup = 10;
 extern const int NumTare = 10;
@@ -136,8 +144,8 @@ extern int dutycycle; // 127 = 50 percent +/-, max valume
 
 struct COLORS
 {
-  int RED[3];
-  int GREEN[3];
+  int RED[3]= {255,0,0};
+  int GREEN[3]= {0,255,0};
   int BLUE[3] = {0, 0, 255};
   int YELLOW[3] = {255, 255, 0};
   int WHITE[3] = {255, 255, 255};
@@ -147,22 +155,21 @@ struct COLORS
 };
 extern struct COLORS clrs;
 
-extern int tstarray[4];
-
-int BlinkTime = CNCT_LED_BLINK_TIME; // blink ON/OFF TIME; if ==0, ON
+extern int BlinkTime; // blink ON/OFF TIME; if ==0, ON
 extern int LEDSelect;                // 0 or 1; make enum
-const int BatSns = 2;
-const int NumADCRdgs = 10; // number of times to read ADC in floatADC
+extern const int BatSns = 2;
+extern const int NumADCRdgs = 10; // number of times to read ADC in floatADC
 // float battvolts = 0.0;
 extern float Batt_HI_Lvl;
 extern float Batt_OK_Lvl;
 extern float Batt_LO_Lvl;
 extern float BatMultDefault; // TODO -find the nominal value
 extern float BatSnsFactor;
+extern const int MS_TO_SEC;
 // const int Batt_CK_Interval = 100 * MS_TO_SEC;
-const int BattWarnPcnt = 40;     // turn connect LED Yellow/Orange
-const int BattCritPcnt = 30;     // turn connect LED Red
-const int BattShutDownPcnt = 20; // go to Sleep.pcnt
+extern const int BattWarnPcnt = 40;     // turn connect LED Yellow/Orange
+extern const int BattCritPcnt = 30;     // turn connect LED Red
+extern const int BattShutDownPcnt = 20; // go to Sleep.pcnt
 // #define Battmah 1000
 // #define Runmah 70
 // #define BattFullTime (Battmah / Runmah) * 60  //in minutes
