@@ -29,25 +29,35 @@ extern const int Battmah;
 extern const int Runmah;
 extern const int BattFullTime; // in minutes
 
-// Seems if these have to be declared before TicTwo
-
-SFE_MAX1704X lipo(MAX1704X_MAX17048); // Create a MAX17048
-// Preferences prefs;
+extern SFE_MAX1704X lipo; // Create a MAX17048
+extern Preferences prefs;
 extern WebServer server;
-HX711 scale;
-Adafruit_NeoPixel pixels(NEOPIXELS, NEOPIN, NEO_GRB + NEO_KHZ800); // 1 ea sk6812 on IO 8
-// TickTwo LEDtimer(LEDBlink, 10, 0, MILLIS);                         // calls LEDBlink, called every 10MS, repeats forever, resolution MS
-extern TickTwo LEDtimer();  // calls LEDBlink, called every 10MS, repeats forever, resolution MS
-extern TickTwo BattChecker();        // checks battery every Batt_Ck_Interval
-extern TickTwo SleepChecker();              // check sleeptimers every ten seconds
+extern HX711 scale;
+// Adafruit_NeoPixel pixels(NEOPIXELS, NEOPIN, NEO_GRB + NEO_KHZ800); // 1 ea sk6812 on IO 8
+extern Adafruit_NeoPixel pixels; // 1 ea sk6812 on IO NeoPin
+//void LEDBlink(void);
+// extern TickTwo LEDtimer(LEDBlink, 10, 0, MILLIS);         // calls LEDBlink, called every 10MS, repeats forever, resolution MS
+extern TickTwo LEDtimer;         // calls LEDBlink, called every 10MS, repeats forever, resolution MS
+//extern TickTwo LEDtimer();  // calls LEDBlink, called every 10MS, repeats forever, resolution MS
+// TickTwo BattChecker(BatSnsCk, Batt_CK_Interval, 0, MILLIS);        // checks battery every Batt_Ck_Interval
+extern TickTwo BattChecker;        // checks battery every Batt_Ck_Interval
+//extern TickTwo BattChecker();        // checks battery every Batt_Ck_Interval
+extern TickTwo SleepChecker;              // check sleeptimers every ten seconds
 
 // TickTwo BattChecker(BatSnsCk, Batt_CK_Interval, 0, MILLIS);        // checks battery every Batt_Ck_Interval
 // TickTwo SleepChecker(RunTimeCheck, 10000, 0, MILLIS);              // check sleeptimers every ten seconds
 
 extern String REV_LEVEL; // last part of commit number
 
-BLEServer *pServer = NULL;
-BLECharacteristic *pTxCharacteristic;
+BLEServer* pServer = NULL;
+// BLECharacteristic* pTxCharacteristic;
+
+
+// extern BLEServer;
+extern BLEServer;
+// extern BLECharacteristic;
+//extern BLECharacteristic ;
+extern BLECharacteristic *pTxCharacteristic;
 
 // Note--number of samples are caclulated in timesinit(); i.e HFrate = 5 => 80/6 = 16 samples
 extern const int BaseSampleRate; // scale 80 sps
@@ -66,8 +76,8 @@ extern unsigned long int el_time; // elapsed time
 extern float scaleVal;            // scale data
 extern float scaleCalVal;
 extern const float scaleCalDeflt; // measured on SN10
-extern const int NumWarmup = 10;
-extern const int NumTare = 10;
+extern const int NumWarmup;
+extern const int NumTare;
 // char TxString[25];  // used to transmit
 
 extern bool deviceConnected; // defined in main
@@ -84,15 +94,15 @@ extern bool SerOutIdle; // if true output idle time
 
 // define pins
 // HX711 pins:
-extern const int HX711_dout = 39; // mcu > HX711 dout pin
-extern const int HX711_sck = 38;  // mcu > HX711 sck pin
+extern const int HX711_dout; // mcu > HX711 dout pin
+extern const int HX711_sck;  // mcu > HX711 sck pin
 // GPIO
-extern const int StartButton = 21; //
-extern const int ShutDownPin = 20;
-extern const int buzzPin = 48;
-extern const int RatePin = 45; // = 0 for 10 sps, 1 for 80 sps
-extern const int sda_rpm = 5;
-extern const int scl_rpm = 4;
+extern const int StartButton; //
+extern const int ShutDownPin;
+extern const int buzzPin;
+extern const int RatePin; // = 0 for 10 sps, 1 for 80 sps
+extern const int sda_rpm;
+extern const int scl_rpm;
 
 extern double BattVolts; // Variable to keep track of LiPo voltage
 extern double BattSOC;   // Variable to keep track of LiPo state-of-charge (SOC)
@@ -157,8 +167,8 @@ extern struct COLORS clrs;
 
 extern int BlinkTime; // blink ON/OFF TIME; if ==0, ON
 extern int LEDSelect;                // 0 or 1; make enum
-extern const int BatSns = 2;
-extern const int NumADCRdgs = 10; // number of times to read ADC in floatADC
+extern const int BatSns;
+//extern const int NumADCRdgs = 10; // number of times to read ADC in floatADC
 // float battvolts = 0.0;
 extern float Batt_HI_Lvl;
 extern float Batt_OK_Lvl;
@@ -167,9 +177,9 @@ extern float BatMultDefault; // TODO -find the nominal value
 extern float BatSnsFactor;
 extern const int MS_TO_SEC;
 // const int Batt_CK_Interval = 100 * MS_TO_SEC;
-extern const int BattWarnPcnt = 40;     // turn connect LED Yellow/Orange
-extern const int BattCritPcnt = 30;     // turn connect LED Red
-extern const int BattShutDownPcnt = 20; // go to Sleep.pcnt
+extern const int BattWarnPcnt;     // turn connect LED Yellow/Orange
+extern const int BattCritPcnt;     // turn connect LED Red
+extern const int BattShutDownPcnt; // go to Sleep.pcnt
 // #define Battmah 1000
 // #define Runmah 70
 // #define BattFullTime (Battmah / Runmah) * 60  //in minutes

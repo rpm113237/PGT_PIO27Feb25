@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include "squeezer.h"
 //using namespace std;
+// BLEServer *pserver =NULL;
+// BLECharacteristic *pTxCharacteristic;
 
 
 void RxStringParse(void) {
@@ -230,7 +232,7 @@ void RxStringParse(void) {
     //Serial.printf("BLEreconnect; deviceConnected = %d\t oldDeviceConnected = %d\n", deviceConnected, oldDeviceConnected);
     if (!deviceConnected && oldDeviceConnected) {
       delay(10);                    // give the bluetooth stack the chance to get things ready
-      pServer->startAdvertising();  // restart advertising
+      pserver->startAdvertising();  // restart advertising
       Serial.println(" in loop reconnect ;start advertising");
       setLED(250, clrs.BLUE);
       oldDeviceConnected = deviceConnected;

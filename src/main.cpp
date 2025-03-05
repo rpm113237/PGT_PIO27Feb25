@@ -10,9 +10,12 @@ static const BaseType_t app_cpu = 0;
 static const BaseType_t app_cpu = 1;
 #endif
 
+//BLEServer *pserver =NULL;
+//BLECharacteristic *pTxCharacteristic;
 
-String rxValue;  // so can process outside of callback; maybe not the best idea
-Preferences prefs;
+
+//String rxValue;  // so can process outside of callback; maybe not the best idea
+//Preferences prefs;
 WebServer server(80);
 
 // See the following for generating UUIDs:
@@ -96,10 +99,10 @@ void setup() {
   // Create the BLE Device
   BLEDevice::init("Squeezer");
   // Create the BLE Server
-  pServer = BLEDevice::createServer();
-  pServer->setCallbacks(new MyServerCallbacks());
+  pserver = BLEDevice::createServer();
+  pserver->setCallbacks(new MyServerCallbacks());
   // Create the BLE Service
-  BLEService* pService = pServer->createService(SERVICE_UUID);
+  BLEService* pService = pserver->createService(SERVICE_UUID);
   // Create a BLE Characteristic
   pTxCharacteristic = pService->createCharacteristic(
     CHARACTERISTIC_UUID_TX,
@@ -114,7 +117,7 @@ void setup() {
   // Start the service
   pService->start();
   // Start advertising
-  pServer->getAdvertising()->start();
+  pserver->getAdvertising()->start();
   // Serial.printf("BLE advertising time = %lu ms\n", (millis()-lagmsStart));
 
   Wire.begin(sda_rpm, scl_rpm);
