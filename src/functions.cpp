@@ -1,8 +1,82 @@
 #include <Arduino.h>
 #include "squeezer.h"
 //using namespace std;
-// BLEServer *pserver =NULL;
-// BLECharacteristic *pTxCharacteristic;
+
+
+#define SERVICE_UUID "6E400001-B5A3-F393-E0A9-E50E24DCCA9E"  //  Nordic UART service UUID
+#define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
+#define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
+// See the following for generating UUIDs:
+// https://www.uuidgenerator.net/
+
+BLEServer *pserver =NULL;
+BLECharacteristic *pTxCharacteristic;
+/**  None of these are required as they will be handled by the library with defaults. **
+ **                       Remove as you see fit for your needs                        */
+
+ class MyServerCallbacks : public BLEServerCallbacks {
+  void onConnect(BLEServer* pServer) {
+    deviceConnected = true;
+    Serial.println("Device Connected!!");
+  };
+
+  void onDisconnect(BLEServer* pServer) {
+    deviceConnected = false;
+    Serial.println("Device Disconnected!!");
+    pixels.setPixelColor(LEDSelect, pixels.Color(clrs.RED[0], clrs.RED[1], clrs.RED[2]));
+    pixels.show();  // Send the updated pixel colors to the hardware.
+  }
+  /***************** New - Security handled here ********************
+  ****** Note: these are the same return values as defaults ********/
+  uint32_t onPassKeyRequest() {
+    Serial.println("Server PassKeyRequest");
+    return 123456;
+  }
+
+  bool onConfirmPIN(uint32_t pass_key) {
+    Serial.print("The passkey YES/NO number: ");
+    Serial.println(pass_key);
+    return true;
+  }
+
+  void onAuthenticationComplete(ble_gap_conn_desc desc) {
+    Serial.println("Starting BLE work!");
+  }
+  /*******************************************************************/
+};
+
+class MyCallbacks : public BLECharacteristicCallbacks {
+  void onWrite(BLECharacteristic* pCharacteristic) {
+    rxValue = pCharacteristic->getValue();
+  }
+};
+
+void setupBLE(void){
+    // Create the BLE Device
+    BLEDevice::init("Squeezer");
+    // Create the BLE Server
+    pserver = BLEDevice::createServer();
+    pserver->setCallbacks(new MyServerCallbacks());
+    // Create the BLE Service
+    BLEService* pService = pserver->createService(SERVICE_UUID);
+    // Create a BLE Characteristic
+    pTxCharacteristic = pService->createCharacteristic(
+      CHARACTERISTIC_UUID_TX,
+      NIMBLE_PROPERTY::NOTIFY
+      // BLECharacteristic::PROPERTY_NOTIFY
+    );
+    BLECharacteristic* pRxCharacteristic = pService->createCharacteristic(
+      CHARACTERISTIC_UUID_RX,
+      NIMBLE_PROPERTY::WRITE);
+  
+    pRxCharacteristic->setCallbacks(new MyCallbacks());
+    // Start the service
+    pService->start();
+    // Start advertising
+    pserver->getAdvertising()->start();
+    // Serial.printf("BLE advertising time = %lu ms\n", (millis()-lagmsStart));
+  
+}
 
 
 void RxStringParse(void) {
