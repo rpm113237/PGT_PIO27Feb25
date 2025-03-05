@@ -1,5 +1,7 @@
 #ifndef _SQUEEZER_H
 #define _SQUEEZER_H
+#include <stdbool.h>
+#include <Arduino.h>
 #include <NimBLEDevice.h>
 #include <TickTwo.h>
 #include <Adafruit_NeoPixel.h>
@@ -49,15 +51,15 @@ extern TickTwo SleepChecker;              // check sleeptimers every ten seconds
 
 extern String REV_LEVEL; // last part of commit number
 
-BLEServer* pServer = NULL;
+//BLEServer* pserver;
 // BLECharacteristic* pTxCharacteristic;
 
 
 // extern BLEServer;
-extern BLEServer;
+//extern BLEServer;
 // extern BLECharacteristic;
 //extern BLECharacteristic ;
-extern BLECharacteristic *pTxCharacteristic;
+//extern BLECharacteristic *pTxCharacteristic;
 
 // Note--number of samples are caclulated in timesinit(); i.e HFrate = 5 => 80/6 = 16 samples
 extern const int BaseSampleRate; // scale 80 sps
@@ -214,6 +216,7 @@ void CheckForce(void);
 void RxStringParse(void);
 
 // void SoundBuzz(u_long cwFreq, int sound_ms = 100);
+void setupBLE(void);
 void CalibrateADC(String strval);
 void SetFFRate(String valStr);
 void SetHFRate(String valStr);

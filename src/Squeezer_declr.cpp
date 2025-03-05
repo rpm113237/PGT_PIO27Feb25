@@ -5,7 +5,7 @@ TickTwo SleepChecker(RunTimeCheck, 10000, 0, MILLIS);              // check slee
 Adafruit_NeoPixel pixels(NEOPIXELS, NEOPIN, NEO_GRB + NEO_KHZ800); // 1 ea sk6812 on IO NeoPin
 SFE_MAX1704X lipo(MAX1704X_MAX17048); // Create a MAX17048
 HX711 scale;
-BLEServer *pserver =NULL;
+//BLEServer *pserver=NULL;
 // BLECharacteristic *pTxCharacteristic;
 
 //#define MS_TO_SEC 1000 // convert to secs
