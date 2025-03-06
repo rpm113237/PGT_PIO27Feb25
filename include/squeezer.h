@@ -151,7 +151,7 @@ extern u_long cwFreq;
 
 // int freq = 2000;
 extern const int ledChannel;
-extern const int resolution;
+extern const int ledRes;
 extern int dutycycle; // 127 = 50 percent +/-, max valume
 
 struct COLORS

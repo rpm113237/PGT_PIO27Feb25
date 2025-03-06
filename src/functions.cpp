@@ -504,9 +504,9 @@ void RxStringParse(void) {
     u_long smillis;
     smillis = millis();
     //ledcAttach(buzzPin, cwFreq, resolution);  //eight bit resolution--why? (Jun24?)
-    ledcWrite(buzzPin, dutycycle);
+    ledcWrite(ledChannel, dutycycle);
     while ((millis() - smillis) < sound_ms);
-    ledcWrite(buzzPin, 0);  //off
+    ledcWrite(ledChannel, 0);  //off
   }
   
   void Soundwakeup(void) {

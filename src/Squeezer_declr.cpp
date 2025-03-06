@@ -100,8 +100,8 @@ const int ditTime = 75, chSpTime = 225;  //dit and dah
 u_long cwFreq = 2500;
 
 const int ledChannel = 0;
-const int resolution = 8;
-int dutycycle= 30; // 127 = 50 percent +/-, max valume
+const int ledRes = 8;
+int dutycycle= 127; // 127 = 50 percent +/-, max valume
 
 struct COLORS clrs;
 
