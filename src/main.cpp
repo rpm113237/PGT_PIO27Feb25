@@ -12,6 +12,60 @@ static const BaseType_t app_cpu = 1;
 
 WebServer server(80);
 
+<<<<<<< HEAD
+=======
+// See the following for generating UUIDs:
+// https://www.uuidgenerator.net/
+
+// #define SERVICE_UUID "6E400001-B5A3-F393-E0A9-E50E24DCCA9E"  //  Nordic UART service UUID
+// #define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
+// #define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
+
+// #define SERVICE_UUID "b56340e0-38a7-11ee-be56-0242ac120002"  // Custom UUID's.  nrfconnect and lightblue require Nordic's UART UUID
+// #define CHARACTERISTIC_UUID_RX "b5634374-38a7-11ee-be56-0242ac120002" // to display strings.
+// #define CHARACTERISTIC_UUID_TX "b56344a0-38a7-11ee-be56-0242ac120002"
+
+/**  None of these are required as they will be handled by the library with defaults. **
+ **                       Remove as you see fit for your needs                        */
+// class MyServerCallbacks : public BLEServerCallbacks {
+//   void onConnect(BLEServer* pServer) {
+//     deviceConnected = true;
+//     Serial.println("Device Connected!!");
+//   };
+
+//   void onDisconnect(BLEServer* pServer) {
+//     deviceConnected = false;
+//     Serial.println("Device Disconnected!!");
+//     pixels.setPixelColor(LEDSelect, pixels.Color(clrs.RED[0], clrs.RED[1], clrs.RED[2]));
+//     pixels.show();  // Send the updated pixel colors to the hardware.
+//   }
+//   /***************** New - Security handled here ********************
+//   ****** Note: these are the same return values as defaults ********/
+//   uint32_t onPassKeyRequest() {
+//     Serial.println("Server PassKeyRequest");
+//     return 123456;
+//   }
+
+//   bool onConfirmPIN(uint32_t pass_key) {
+//     Serial.print("The passkey YES/NO number: ");
+//     Serial.println(pass_key);
+//     return true;
+//   }
+
+//   void onAuthenticationComplete(ble_gap_conn_desc desc) {
+//     Serial.println("Starting BLE work!");
+//   }
+//   /*******************************************************************/
+// };
+
+// class MyCallbacks : public BLECharacteristicCallbacks {
+//   void onWrite(BLECharacteristic* pCharacteristic) {
+//     rxValue = pCharacteristic->getValue();
+//   }
+// };
+
+
+>>>>>>> origin/main
 // the setup function runs once when you press reset or power the board
 void setup() {
   // initialize serial communication at 115200 bits per second:
@@ -38,8 +92,39 @@ void setup() {
 
   print_wakeup_reason();  //output and store wakeup count
 
+<<<<<<< HEAD
   
   Wire.begin(sda_rpm, scl_rpm);    
+=======
+  setupBLE();
+
+  // // Create the BLE Device
+  // BLEDevice::init("Squeezer");
+  // // Create the BLE Server
+  // pserver = BLEDevice::createServer();
+  // pserver->setCallbacks(new MyServerCallbacks());
+  // // Create the BLE Service
+  // BLEService* pService = pserver->createService(SERVICE_UUID);
+  // // Create a BLE Characteristic
+  // pTxCharacteristic = pService->createCharacteristic(
+  //   CHARACTERISTIC_UUID_TX,
+  //   NIMBLE_PROPERTY::NOTIFY
+  //   // BLECharacteristic::PROPERTY_NOTIFY
+  // );
+  // BLECharacteristic* pRxCharacteristic = pService->createCharacteristic(
+  //   CHARACTERISTIC_UUID_RX,
+  //   NIMBLE_PROPERTY::WRITE);
+
+  // pRxCharacteristic->setCallbacks(new MyCallbacks());
+  // // Start the service
+  // pService->start();
+  // // Start advertising
+  // pserver->getAdvertising()->start();
+  // // Serial.printf("BLE advertising time = %lu ms\n", (millis()-lagmsStart));
+
+  Wire.begin(sda_rpm, scl_rpm);
+    
+>>>>>>> origin/main
   lipo.enableDebugging();     // Uncomment this line to enable helpful debug messages on Serial
   if (lipo.begin() == false)  // Connect to the MAX17048 using the default wire port
   {
